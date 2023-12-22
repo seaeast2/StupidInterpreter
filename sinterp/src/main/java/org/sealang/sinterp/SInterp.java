@@ -10,7 +10,8 @@ import java.nio.file.Paths;
 
 public class SInterp {
 
-    private static boolean hadError;
+    // true 이면 코드를 더이상 실행하지 않도록 한다.
+    private static boolean hadError = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -27,6 +28,10 @@ public class SInterp {
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
+
+        // 종료할 때 에러 코드를 명시
+        if (hadError)
+            System.exit(65);
     }
 
     // 커맨드라인으로 실행할 때. Ctrl+D 로 종료 가능
@@ -40,6 +45,7 @@ public class SInterp {
             if (line == null)
                 break;
             run(line);
+            hadError = false; // 커맨드라인 모드에서는 한줄마다 에러 리셋
         }
     }
 
