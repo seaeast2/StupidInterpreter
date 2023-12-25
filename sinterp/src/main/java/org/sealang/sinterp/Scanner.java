@@ -11,8 +11,8 @@ public class Scanner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
 
-    private int start = 0; // lexeme 의 첫번째 문자
-    private int current = 0; // 현재의 위치
+    private int start = 0; // first character of lexeme
+    private int current = 0; // current position
     private int line = 1;
 
     private static final Map<String, TokenType> keywords;
@@ -43,7 +43,7 @@ public class Scanner {
 
     List<Token> scanTokens() {
         while (!isAtEnd()) {
-            // 우리는 다음 lexeme 앞에 있다.
+            // we are in front of next lexeme.
             start = current;
             scanToken();
         }
