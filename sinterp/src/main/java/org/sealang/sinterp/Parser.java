@@ -17,6 +17,7 @@ import static org.sealang.sinterp.TokenType.*;
 
 // 재귀 하강 파서
 class Parser {
+    private static class ParseError extends RuntimeException {}
     private final List<Token> tokens;
     private int current = 0;
 
@@ -110,6 +111,8 @@ class Parser {
             consume(RPAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
+
+        return null;
     }
 
     private boolean match(TokenType... types) {
@@ -121,6 +124,13 @@ class Parser {
         }
 
         return false;
+    }
+
+    private Token consume(TokenType type, String message) {
+        if (check(type))
+            return advance();
+
+        throw error(peek(), message);
     }
 
     private boolean check(TokenType type) { // token 을 소비하지 않는다.
@@ -145,5 +155,10 @@ class Parser {
 
     private Token previous() {
         return tokens.get(current-1);
+    }
+
+    private ParseError error(Token token, String message) {
+        SInterp.error(token, message);
+        return new ParseError();
     }
 }
