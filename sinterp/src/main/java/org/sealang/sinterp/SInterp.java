@@ -53,10 +53,20 @@ public class SInterp {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
+        /*
         // 지금은 단지 토큰을 출력한다.
         for (Token token : tokens) {
             System.out.println(token);
         }
+        */
+
+        Parser parser = new Parser(tokens);
+        Expr expression = parser.parse();
+        // 구문 오류가 있으면 멈춘다.
+        if (hadError)
+            return;
+
+        System.out.println(new AstPrinter().print(expression));
     }
     
     static void error(int line, String message) {
