@@ -12,6 +12,7 @@ public class SInterp {
 
     // true 이면 코드를 더이상 실행하지 않도록 한다.
     private static boolean hadError = false;
+    private static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1) {
@@ -85,5 +86,11 @@ public class SInterp {
         else {
             report(token.line, " at '" + token.lexeme + "'", message);
         }
+    }
+
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() +
+                "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 }
