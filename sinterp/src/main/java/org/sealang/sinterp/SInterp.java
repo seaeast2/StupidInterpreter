@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class SInterp {
+    private static final Interpreter interpreter = new Interpreter();
 
     // true 이면 코드를 더이상 실행하지 않도록 한다.
     private static boolean hadError = false;
@@ -33,6 +34,8 @@ public class SInterp {
         // 종료할 때 에러 코드를 명시
         if (hadError)
             System.exit(65);
+        if (hadRuntimeError)
+            System.exit(70);
     }
 
     // 커맨드라인으로 실행할 때. Ctrl+D 로 종료 가능
@@ -63,11 +66,15 @@ public class SInterp {
 
         Parser parser = new Parser(tokens);
         Expr expression = parser.parse();
-        // 구문 오류가 있으면 멈춘다.
-        if (hadError)
-            return;
 
+        /*
+        // AST 출력
+        if (hadError) // 구문 오류가 있으면 멈춘다.
+            return;
         System.out.println(new AstPrinter().print(expression));
+        */
+
+        interpreter.interpret((expression));
     }
     
     static void error(int line, String message) {

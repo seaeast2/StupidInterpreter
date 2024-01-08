@@ -128,6 +128,7 @@ class Interpreter implements Expr.Visitor<Object> {
         return a.equals(b);
     }
 
+    // object 의 string 출력 수정
     private String stringify(Object object) {
         if (object == null)
             return "nil";
