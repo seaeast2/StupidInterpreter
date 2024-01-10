@@ -1,6 +1,15 @@
 package org.sealang.sinterp;
 
 class Interpreter implements Expr.Visitor<Object> {
+    public void interpret(Expr expression) {
+        try {
+            Object value = evaluate(expression);
+            System.out.println(stringify(value));
+        }
+        catch (RuntimeError error) {
+            SInterp.runtimeError(error);
+        }
+    }
 
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
@@ -85,15 +94,7 @@ class Interpreter implements Expr.Visitor<Object> {
         return null;
     }
 
-    public void interpret(Expr expression) {
-        try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
-        }
-        catch (RuntimeError error) {
-            SInterp.runtimeError(error);
-        }
-    }
+
 
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double)
