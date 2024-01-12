@@ -1,6 +1,7 @@
 package org.sealang.sinterp;
 
-class Interpreter implements Expr.Visitor<Object> {
+class Interpreter implements Expr.Visitor<Object>,
+                             Stmt.Visitor<Void> {
     public void interpret(Expr expression) {
         try {
             Object value = evaluate(expression);
@@ -146,6 +147,26 @@ class Interpreter implements Expr.Visitor<Object> {
     }
 
     private Object evaluate(Expr expr) {
+        /*
+        accept 는 Expr.Visitor<R> 타입을 인자로 받으므로 accept 는
+        Expr.Visitor<Object> 을 통해서
+        'Object Expr.accept(Expr.Visitor<Object> visitor)' 으로 instantiation 된다.
+        이때 Expr 은 구체 클래스의 부모 인터페이스 이므로 구체 클래스에 accept()
+        함수의 실체가 추가된다.
+        */
         return expr.accept(this);
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
     }
 }
