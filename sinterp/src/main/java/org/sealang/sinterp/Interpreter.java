@@ -1,11 +1,23 @@
 package org.sealang.sinterp;
 
+import java.util.List;
+
 class Interpreter implements Expr.Visitor<Object>,
                              Stmt.Visitor<Void> {
-    public void interpret(Expr expression) {
+    /*public void interpret(Expr expression) {
         try {
             Object value = evaluate(expression);
             System.out.println(stringify(value));
+        }
+        catch (RuntimeError error) {
+            SInterp.runtimeError(error);
+        }
+    }*/
+    void interpret(List<Stmt> statements) {
+        try {
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         }
         catch (RuntimeError error) {
             SInterp.runtimeError(error);
@@ -155,6 +167,10 @@ class Interpreter implements Expr.Visitor<Object>,
         함수의 실체가 추가된다.
         */
         return expr.accept(this);
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     @Override
