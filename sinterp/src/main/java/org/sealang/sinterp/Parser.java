@@ -9,6 +9,9 @@ import static org.sealang.sinterp.TokenType.*;
 전체 문법 :
     program        → statement* EOF ;
 
+    declaration    → varDecl
+                   | statement;
+
     statement      → exprStmt
                    | printStmt ;
 
