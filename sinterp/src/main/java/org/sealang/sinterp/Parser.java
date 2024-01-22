@@ -15,6 +15,8 @@ import static org.sealang.sinterp.TokenType.*;
     statement      → exprStmt
                    | printStmt ;
 
+    varDecl        → "var" IDENTIFIER ( "=" expression )? ";";
+
     exprStmt       → expression ";" ;
     printStmt      → "print" expression ";" ;
 
@@ -25,12 +27,10 @@ import static org.sealang.sinterp.TokenType.*;
     factor → unary ( ( "/" | "*" ) unary )* ;
     unary → ( "!" | "-" ) unary | primary ;
 
-    primary → NUMBER
-            | STRING
-            | "true"
-            | "false"
-            | "nil"
-            | "(" expression ")" ;
+    primary        → "true" | "false" | "nil"
+                     | NUMBER | STRING
+                     | "(" expression ")"
+                     | IDENTIFIER ;
  */
 
 
@@ -55,7 +55,8 @@ class Parser {
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(statement());
+            //statements.add(statement());
+            statements.add(declaration());
         }
 
         return statements;
@@ -65,6 +66,19 @@ class Parser {
     // expression → equality ;
     private Expr expression() {
         return equality();
+    }
+
+    // declaration() 은 에러 복구를 하기에 적당한 위치이다.
+    private Stmt declaration() {
+        try {
+            if(match(VAR))
+                varDeclaration();
+            return statement();
+        }
+        catch (ParseError error) {
+            synchronize();
+            return null;
+        }
     }
 
     private Stmt statement() {
