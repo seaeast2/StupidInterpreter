@@ -70,7 +70,7 @@ class Parser {
 
     // declaration() 은 에러 복구를 하기에 적당한 위치이다.
     private Stmt declaration() {
-        try {
+        try { // 에러를 복구 하기 위해 try-catch 문으로 감싼다.
             if(match(VAR))
                 varDeclaration();
             return statement();
@@ -92,6 +92,18 @@ class Parser {
         Expr value = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (match(EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
     }
 
     private Stmt expressionStatement() {
@@ -171,11 +183,12 @@ class Parser {
             return new Expr.Literal(true);
         if (match(NIL))
             return new Expr.Literal(null);
-
         if (match(NUMBER, STRING)) {
             return new Expr.Literal(previous().literal);
         }
-
+        if (match(IDENTIFIER)) {
+            return new Expr.Variable(previous());
+        }
         if (match(LPAREN)) {
             Expr expr = expression();
             consume(RPAREN, "Expect ')' after expression.");
