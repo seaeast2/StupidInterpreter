@@ -34,7 +34,7 @@ import static org.sealang.sinterp.TokenType.*;
  */
 
 
-// 재귀 하강 파서
+// AST 구축
 class Parser {
     private static class ParseError extends RuntimeException {}
     private final List<Token> tokens;

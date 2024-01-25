@@ -2,17 +2,12 @@ package org.sealang.sinterp;
 
 import java.util.List;
 
+// AST 실행
 class Interpreter implements Expr.Visitor<Object>,
                              Stmt.Visitor<Void> {
-    /*public void interpret(Expr expression) {
-        try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
-        }
-        catch (RuntimeError error) {
-            SInterp.runtimeError(error);
-        }
-    }*/
+
+    private Environment environment = new Environment();
+
     void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
@@ -107,7 +102,10 @@ class Interpreter implements Expr.Visitor<Object>,
         return null;
     }
 
-
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
+    }
 
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double)
@@ -183,6 +181,17 @@ class Interpreter implements Expr.Visitor<Object>,
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, value);
         return null;
     }
 }
