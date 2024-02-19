@@ -14,6 +14,7 @@ public class GenerateAst {
         }
         String outputDir = args[0];
 
+        // 문 Node 정의
         defineAst(outputDir, "Expr", Arrays.asList(
                 "Binary     : Expr left, Token operator, Expr right",
                 "Grouping   : Expr expression",
@@ -22,6 +23,7 @@ public class GenerateAst {
                 "Variable   : Token name"
         ));
 
+        // 문장 Node 정의
         defineAst(outputDir, "Stmt", Arrays.asList(
                 "Expression : Expr expression",
                 "Print      : Expr expression",

@@ -72,7 +72,7 @@ class Parser {
     private Stmt declaration() {
         try { // 에러를 복구 하기 위해 try-catch 문으로 감싼다.
             if(match(VAR))
-                varDeclaration();
+                return varDeclaration();
             return statement();
         }
         catch (ParseError error) {
