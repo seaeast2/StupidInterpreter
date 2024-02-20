@@ -7,30 +7,33 @@ import static org.sealang.sinterp.TokenType.*;
 
 /*
 전체 문법 :
-    program        → statement* EOF ;
+    program     → statement* EOF ;
 
-    declaration    → varDecl
-                   | statement;
+    declaration → varDecl
+                | statement;
 
-    statement      → exprStmt
-                   | printStmt ;
+    statement   → exprStmt
+                | printStmt ;
 
-    varDecl        → "var" IDENTIFIER ( "=" expression )? ";";
+    varDecl     → "var" IDENTIFIER ( "=" expression )? ";";
 
-    exprStmt       → expression ";" ;
-    printStmt      → "print" expression ";" ;
+    exprStmt    → expression ";" ;
+    printStmt   → "print" expression ";" ;
 
-    expression → equality ;
-    equality → comparison ( ( "!=" | "==" ) comparison )* ;
-    comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-    term → factor ( ( "-" | "+" ) factor )* ;
-    factor → unary ( ( "/" | "*" ) unary )* ;
-    unary → ( "!" | "-" ) unary | primary ;
+    expression  → assignment ;
+    assignment  → IDENTIFIER "=" assignment
+                | equality ;
 
-    primary        → "true" | "false" | "nil"
-                     | NUMBER | STRING
-                     | "(" expression ")"
-                     | IDENTIFIER ;
+    equality    → comparison ( ( "!=" | "==" ) comparison )* ;
+    comparison  → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+    term        → factor ( ( "-" | "+" ) factor )* ;
+    factor      → unary ( ( "/" | "*" ) unary )* ;
+    unary       → ( "!" | "-" ) unary | primary ;
+
+    primary     → "true" | "false" | "nil"
+                | NUMBER | STRING
+                | "(" expression ")"
+                | IDENTIFIER ;
  */
 
 
