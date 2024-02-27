@@ -66,9 +66,9 @@ class Parser {
     }
 
 
-    // expression → equality ;
+    // expression  → assignment ;
     private Expr expression() {
-        return equality();
+        return assignment();
     }
 
     // declaration() 은 에러 복구를 하기에 적당한 위치이다.
@@ -113,6 +113,28 @@ class Parser {
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    /*
+    assignment  → IDENTIFIER "=" assignment
+                | equality ;
+     */
+    private Expr assignment() {
+        Expr expr = equality(); // identifier 혹은 equality 임
+
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+
+            // expr 이 변수(Variable)인지 확인하여, 변수면 Assign 노드 구성
+            if (expr instanceof Expr.Variable) {
+                Token name = ((Expr.Variable)expr).name;
+                return new Expr.Assign(name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+        return expr;
     }
 
     // equality → comparison ( ( "!=" | "==" ) comparison )* ;
