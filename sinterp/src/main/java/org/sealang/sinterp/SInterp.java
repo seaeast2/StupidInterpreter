@@ -54,16 +54,18 @@ public class SInterp {
     }
 
     private static void run(String source) {
+        // Scanner 를 통해 한줄에 대한 토큰 뭉치를 생성
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
         /*
-        // 지금은 단지 토큰을 출력한다.
+        // 테스트로 토큰 출력
         for (Token token : tokens) {
             System.out.println(token);
         }
         */
 
+        // 앞서 만든 토큰을 파싱후 AST 구축
         Parser parser = new Parser(tokens);
         //Expr expression = parser.parse();
         List<Stmt> statements = parser.parse();
@@ -74,6 +76,7 @@ public class SInterp {
             return;
         //System.out.println(new AstPrinter().print(expression));
 
+        // AST 를 실행
         interpreter.interpret(statements);
     }
     
