@@ -26,6 +26,7 @@ public class GenerateAst {
 
         // 문장 Node 정의
         defineAst(outputDir, "Stmt", Arrays.asList(
+                "Block      : List<Stmt> statements",
                 "Expression : Expr expression",
                 "Print      : Expr expression",
                 "Var        : Token name, Expr initializer"

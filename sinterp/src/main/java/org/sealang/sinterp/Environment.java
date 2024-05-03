@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Environment {
-    final Environment enclosing;
+    final Environment enclosing; // scope 를 구현하기 위해 환경 저장
     private final Map<String, Object> values = new HashMap<>();
 
     Environment() {
@@ -21,6 +21,10 @@ public class Environment {
             return values.get(name.lexeme);
         }
 
+        // 현재 Scope 에서 이름을 찾을 수 없을 경우 상위 환경에서 검색
+        if (enclosing != null)
+            return enclosing.get(name);
+
         throw new RuntimeError(name,
                 "Undefined variable '" + name.lexeme + "'.");
     }
@@ -28,6 +32,11 @@ public class Environment {
     void assign(Token name, Object value) {
         if (values.containsKey((name.lexeme))) {
             values.put(name.lexeme, value);
+            return;
+        }
+
+        if (enclosing != null) {
+            enclosing.assign(name, value);
             return;
         }
 

@@ -13,7 +13,10 @@ import static org.sealang.sinterp.TokenType.*;
                 | statement;
 
     statement   → exprStmt
-                | printStmt ;
+                | printStmt
+                | block ;
+
+    block       → "{" declaration* "}"
 
     varDecl     → "var" IDENTIFIER ( "=" expression )? ";";
 
@@ -88,6 +91,9 @@ class Parser {
         if (match(PRINT))
             return printStatement();
 
+        if (match(LBRACE))
+            return new Stmt.Block(block());
+
         return expressionStatement();
     }
 
@@ -113,6 +119,17 @@ class Parser {
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while(!check(RBRACE) && !isAtEnd()) { // isAtEnd() 는 사용자가 } 을 빠뜨려도 파서가 멈추지 않도록 한다.
+            statements.add(declaration());
+        }
+
+        consume(RBRACE, "Expect '}' after block.");
+        return statements;
     }
 
     /*
@@ -253,6 +270,7 @@ class Parser {
         return previous();
     }
 
+    // 소스의 끝에 도달했는지 여부
     private boolean isAtEnd() {
         return peek().type == EOF;
     }
