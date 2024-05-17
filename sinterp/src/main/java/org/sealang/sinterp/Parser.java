@@ -13,6 +13,7 @@ import static org.sealang.sinterp.TokenType.*;
                 | statement;
 
     statement   → exprStmt
+                | ifStmt
                 | printStmt
                 | block ;
 
@@ -22,10 +23,15 @@ import static org.sealang.sinterp.TokenType.*;
 
     exprStmt    → expression ";" ;
     printStmt   → "print" expression ";" ;
+    ifStmt      → "if" "(" expression ")" statement
+                ( "else" statement )? ;
 
     expression  → assignment ;
     assignment  → IDENTIFIER "=" assignment
-                | equality ;
+                | logic_or ;
+
+    logic_or    → logic_and ( "or" logic_and )* ;
+    logic_and   → equality ( "and" equality )* ;
 
     equality    → comparison ( ( "!=" | "==" ) comparison )* ;
     comparison  → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -88,6 +94,9 @@ class Parser {
     }
 
     private Stmt statement() {
+        if (match(IF))
+            return ifStatement();
+
         if (match(PRINT))
             return printStatement();
 
@@ -95,6 +104,20 @@ class Parser {
             return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt ifStatement() {
+        consume(LPAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RPAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt printStatement() {
@@ -134,10 +157,10 @@ class Parser {
 
     /*
     assignment  → IDENTIFIER "=" assignment
-                | equality ;
+                | logic_or ;
      */
     private Expr assignment() {
-        Expr expr = equality(); // identifier 혹은 equality 임
+        Expr expr = or(); // logic_or
 
         if (match(EQUAL)) {
             Token equals = previous();
@@ -151,6 +174,30 @@ class Parser {
 
             error(equals, "Invalid assignment target.");
         }
+        return expr;
+    }
+
+    private Expr or() {
+        Expr expr = and();
+
+        while(match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = equality();
+
+        while(match(OR)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
         return expr;
     }
 
@@ -264,6 +311,7 @@ class Parser {
         return peek().type == type;
     }
 
+    // 현재 위치에서 하나 앞의 토큰 얻기
     private Token advance() {
         if (!isAtEnd())
             current++;
@@ -275,10 +323,12 @@ class Parser {
         return peek().type == EOF;
     }
 
+    // 현재 토큰
     private Token peek() {
         return tokens.get(current);
     }
 
+    // 현재 위치에서 1개 뒤 토큰 얻기
     private Token previous() {
         return tokens.get(current-1);
     }
