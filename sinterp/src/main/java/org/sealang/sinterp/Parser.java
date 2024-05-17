@@ -1,6 +1,7 @@
 package org.sealang.sinterp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.sealang.sinterp.TokenType.*;
@@ -13,10 +14,15 @@ import static org.sealang.sinterp.TokenType.*;
                 | statement;
 
     statement   → exprStmt
+                | forStmt
                 | ifStmt
                 | printStmt
                 | whileStmt
                 | block ;
+
+    forStmt     → "for" "(" ( varDecl | exprStmt | ";" )
+                  expression? ";"
+                  expression? ")" statement ;
 
     whileStmt   → "while" "(" expression ")" statement ;
 
@@ -97,6 +103,9 @@ class Parser {
     }
 
     private Stmt statement() {
+        if (match(FOR))
+            return forStatement();
+
         if (match(IF))
             return ifStatement();
 
@@ -110,6 +119,55 @@ class Parser {
             return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt forStatement() {
+        consume(LPAREN, "Expect '(' after 'for'.");
+
+        // 초기화절
+        Stmt initializer;
+        if (match(SEMICOLON)) { // 'for (;' 초기화가 없는 상황.
+            initializer = null;
+        } else if (match(VAR)) { // 'for (var ...
+            initializer = varDeclaration();
+        } else { // 'for ( ...
+            initializer = expressionStatement();
+        }
+
+        // 조건절
+        Expr condition = null;
+        if (!check(SEMICOLON)) { // 앞에서 ; 은 소비되나?
+            condition = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after loop condition.");
+
+
+        Expr increment = null;
+        if (!check(RPAREN)) {
+            increment = expression();
+        }
+        consume(RPAREN, "Expect ')' after for clauses.");
+        Stmt body = statement();
+
+        // 디슈가링. for문을 while문으로 풀어씀
+        if (increment != null) {
+            body = new Stmt.Block(
+                    Arrays.asList(
+                            body,
+                            new Stmt.Expression(increment)));
+        }
+
+        if (condition == null)// 조건문이 없으면 무조건 true
+            condition = new Expr.Literal(true);
+        body = new Stmt.While(condition, body);
+
+        if (initializer != null) {
+            body = new Stmt.Block(Arrays.asList(initializer, body));
+        }
+
+
+
+        return body;
     }
 
     private Stmt ifStatement() {
@@ -320,6 +378,7 @@ class Parser {
         throw error(peek(), message);
     }
 
+    // token 을 소비하지 않고 현재 토큰 검사
     private boolean check(TokenType type) { // token 을 소비하지 않는다.
         if (isAtEnd())
             return false;
