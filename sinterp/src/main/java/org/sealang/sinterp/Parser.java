@@ -15,7 +15,10 @@ import static org.sealang.sinterp.TokenType.*;
     statement   → exprStmt
                 | ifStmt
                 | printStmt
+                | whileStmt
                 | block ;
+
+    whileStmt   → "while" "(" expression ")" statement ;
 
     block       → "{" declaration* "}"
 
@@ -100,6 +103,9 @@ class Parser {
         if (match(PRINT))
             return printStatement();
 
+        if (match(WHILE))
+            return whileStatement();
+
         if (match(LBRACE))
             return new Stmt.Block(block());
 
@@ -136,6 +142,15 @@ class Parser {
 
         consume(SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
+    }
+
+    private Stmt whileStatement() {
+        consume(LPAREN, "Expect '(' after 'while'.");
+        Expr condition = expression();
+        consume(RPAREN, " Expect ')' after condition.");
+        Stmt body = statement();
+
+        return new Stmt.While(condition, body);
     }
 
     private Stmt expressionStatement() {
