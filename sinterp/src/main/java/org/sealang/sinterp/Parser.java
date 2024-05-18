@@ -46,7 +46,9 @@ import static org.sealang.sinterp.TokenType.*;
     comparison  → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
     term        → factor ( ( "-" | "+" ) factor )* ;
     factor      → unary ( ( "/" | "*" ) unary )* ;
-    unary       → ( "!" | "-" ) unary | primary ;
+    unary       → ( "!" | "-" ) unary | call ;
+    call        → primary ( "(" arguments? ")" )* ;
+    arguments   → expression ( "," expression )* ;
 
     primary     → "true" | "false" | "nil"
                 | NUMBER | STRING
@@ -334,7 +336,34 @@ class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(RPAREN)) {
+            do {
+                arguments.add(expression());
+            } while (match(COMMA));
+        }
+        Token paren = consume(RPAREN,
+                "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+
+        while(true) {
+            if (match(LPAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+
+        return expr;
     }
 
     // primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
