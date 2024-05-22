@@ -67,14 +67,6 @@ class Parser {
         this.tokens = tokens;
     }
 
-    /*Expr parse() {
-        try {
-            return expression();
-        }
-        catch (ParseError error) {
-            return null;
-        }
-    }*/
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
@@ -84,7 +76,6 @@ class Parser {
 
         return statements;
     }
-
 
     // expression  → assignment ;
     private Expr expression() {
@@ -343,6 +334,9 @@ class Parser {
         List<Expr> arguments = new ArrayList<>();
         if (!check(RPAREN)) {
             do {
+                if (arguments.size() >= 255) { // argument 의 최대 개수 제한
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
                 arguments.add(expression());
             } while (match(COMMA));
         }
