@@ -262,6 +262,11 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        return null;
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         if (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.thenBranch);
