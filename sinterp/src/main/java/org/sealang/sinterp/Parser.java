@@ -10,8 +10,13 @@ import static org.sealang.sinterp.TokenType.*;
 전체 문법 :
     program     → statement* EOF ;
 
-    declaration → varDecl
+    declaration → funDecl
+                | varDecl
                 | statement;
+
+    funcDecl    → "fun" function ;
+    function    → IDENTIFIER "(" parameters? ")" block ;
+    parameters  → IDENTIFIER ( "," IDENTIFIER )* ;
 
     statement   → exprStmt
                 | forStmt
@@ -85,7 +90,9 @@ class Parser {
     // declaration() 은 에러 복구를 하기에 적당한 위치이다.
     private Stmt declaration() {
         try { // 에러를 복구 하기 위해 try-catch 문으로 감싼다.
-            if(match(VAR))
+            if (match(FUN))
+                return function("function");
+            if (match(VAR))
                 return varDeclaration();
             return statement();
         }
@@ -208,6 +215,27 @@ class Parser {
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    // kind : "function" or "method" 를 전달. 일반 함수와 클래스 메서드를 구분하기 위함.
+    private Stmt.Function function(String kind) {
+        Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LPAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RPAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (match(COMMA));
+        }
+        consume(RPAREN, "Expect ')' after parameters.");
+
+        consume(LBRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+        return new Stmt.Function(name, parameters, body);
     }
 
     private List<Stmt> block() {
