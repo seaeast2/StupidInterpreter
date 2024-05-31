@@ -27,7 +27,12 @@ public class LoxFunction implements LoxCallable {
             environment.define(declaration.params.get(i).lexeme,
                     arguments.get(i));// 심볼 테이블에 파라미터 등록
         }
-        interpreter.executeBlock(declaration.body, environment);
+
+        try {
+            interpreter.executeBlock(declaration.body, environment);
+        } catch (Return returnValue) {
+            return returnValue.value;
+        }
         return null;
     }
 
