@@ -42,6 +42,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         stmt.accept(this);
     }
 
+    private void resolve(Expr expr) {
+        expr.accept(this);
+    }
+
     private void beginScope() {
         scopes.push(new HashMap<String, Boolean>());
     }
