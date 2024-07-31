@@ -9,9 +9,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     // scopes 의 key 는 변수명, value 는 변수의 initializer 의 resolve 가 완료되었는지 여부를 나타낸다.
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private FunctionType currentFunction = FunctionType.NONE;
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
+    }
+
+    private enum FunctionType {
+        NONE,
+        FUNCTION
     }
 
     void resolve(List<Stmt> statements) {
@@ -39,7 +45,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name); // 함수 이름을 현재 scope 에 등록
         define(stmt.name); // 함수 이름을 리졸브
 
-        resolveFunction(stmt);
+        resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
     }
 
@@ -158,7 +164,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         expr.accept(this);
     }
 
-    private void resolveFunction(Stmt.Function function) {
+    private void resolveFunction(Stmt.Function function, FunctionType type) {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = type;
+
         beginScope();
         for (Token param : function.params) {
             declare(param);
@@ -182,6 +191,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             return;
 
         Map<String, Boolean> scope = scopes.peek();
+        if (scope.containsKey(name.lexeme)) { // 이름이 같은 변수가 이미 등록되어 있으면 오류
+            SInterp.error(name,
+                    "Already a variable with this name in this scope.");
+        }
         scope.put(name.lexeme, false); // 선언만 되고 define 되지 않았기 때문에 false
     }
 

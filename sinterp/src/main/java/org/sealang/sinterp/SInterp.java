@@ -58,23 +58,18 @@ public class SInterp {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        /*
-        // 테스트로 토큰 출력
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
-        */
-
         // 앞서 만든 토큰을 파싱후 AST 구축
         Parser parser = new Parser(tokens);
         //Expr expression = parser.parse();
         List<Stmt> statements = parser.parse();
 
-
         // 구문 오류가 있으면 멈춘다.
         if (hadError)
             return;
-        //System.out.println(new AstPrinter().print(expression));
+
+        // 변수 리졸브
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
 
         // AST 를 실행
         interpreter.interpret(statements);

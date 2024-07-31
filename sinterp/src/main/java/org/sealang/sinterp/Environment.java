@@ -52,6 +52,11 @@ public class Environment {
         return ancestor(distance).values.get(name);
     }
 
+    void assignAt(int distance, Token name, Object value) {
+        // 거리만큼 떨어진 환경을 가져와서 value 를 셋팅한다.
+        ancestor(distance).values.put(name.lexeme, value);
+    }
+
     Environment ancestor(int distance) {
         Environment environment = this;
         for (int i = 0; i < distance; i++) {
