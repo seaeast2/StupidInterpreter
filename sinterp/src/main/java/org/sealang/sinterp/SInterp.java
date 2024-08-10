@@ -63,7 +63,7 @@ public class SInterp {
         //Expr expression = parser.parse();
         List<Stmt> statements = parser.parse();
 
-        // 구문 오류가 있으면 멈춘다.
+        // 구문 에러 발생 시 멈춘다.
         if (hadError)
             return;
 
@@ -71,7 +71,11 @@ public class SInterp {
         Resolver resolver = new Resolver(interpreter);
         resolver.resolve(statements);
 
-        // AST 를 실행
+        // 레졸루션 에러 발생 시 멈춘다.
+        if (hadError)
+            return;
+
+        // 인터프리터에서 AST 를 실행
         interpreter.interpret(statements);
     }
     

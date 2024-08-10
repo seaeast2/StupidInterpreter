@@ -45,6 +45,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name); // 함수 이름을 현재 scope 에 등록
         define(stmt.name); // 함수 이름을 리졸브
 
+        // 리졸브시에 함수 내부인지 아닌지 표시하여 오류를 잡아내기 위해 함수로 설정
         resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
     }
@@ -66,6 +67,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
+        if (currentFunction == FunctionType.NONE) {
+            SInterp.error(stmt.keyword, "Can't return from top-level code.");
+        }
         if (stmt.value != null) {
             resolve(stmt.value);
         }
@@ -165,7 +169,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void resolveFunction(Stmt.Function function, FunctionType type) {
-        FunctionType enclosingFunction = currentFunction;
+        FunctionType enclosingFunction = currentFunction; // 둘러싸고 있는 함수 임시 저장
         currentFunction = type;
 
         beginScope();
@@ -175,6 +179,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
         resolve(function.body);
         endScope();
+        currentFunction = enclosingFunction;
     }
 
     private void beginScope() {
@@ -185,7 +190,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scopes.pop();
     }
 
-    // 이름 있는 객체(함수나 변수들)를 scope 에 등록
+    // 이름 있는 객체(함수나 변수들)를 scope symbol table 에 등록
     private void declare(Token name) {
         if (scopes.isEmpty())
             return;
