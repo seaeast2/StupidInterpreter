@@ -10,10 +10,12 @@ import static org.sealang.sinterp.TokenType.*;
 전체 문법 :
     program     → statement* EOF ;
 
-    declaration → funDecl
+    declaration → classDecl
+                | funDecl
                 | varDecl
                 | statement;
 
+    classDecl   → "class" IDENTIFIER "{" function* "}" ;
     funcDecl    → "fun" function ;
     function    → IDENTIFIER "(" parameters? ")" block ;
     parameters  → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -90,9 +92,10 @@ class Parser {
         return assignment();
     }
 
-    // declaration() 은 에러 복구를 하기에 적당한 위치이다.
     private Stmt declaration() {
         try { // 에러를 복구 하기 위해 try-catch 문으로 감싼다.
+            if (match(CLASS))
+                return classDeclaration();
             if (match(FUN))
                 return function("function");
             if (match(VAR))
@@ -100,9 +103,23 @@ class Parser {
             return statement();
         }
         catch (ParseError error) {
-            synchronize();
+            synchronize(); // 에러 복구
             return null;
         }
+    }
+
+    private Stmt classDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect class name");
+        consume(LBRACE, "Expect '{' before class body.");
+
+        List<Stmt.Function> methods = new ArrayList<>();
+        while(!check(RBRACE) && !isAtEnd()) { // } 과 EOF 가 아닐 경우 반복
+            methods.add(function("method"));
+        }
+
+        consume(RBRACE, "Expect '}' after class body.");
+
+        return new Stmt.Class(name, methods);
     }
 
     private Stmt statement() {

@@ -7,6 +7,14 @@ import java.util.Stack;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
+    /* scopes 구조
+    +----------------------+
+    | Map<String, Boolean> | Top
+    +----------------------+
+    | Map<String, Boolean> |
+    +----------------------+
+    |          ...         |
+    */
     // scopes 의 key 는 변수명, value 는 변수의 initializer 의 resolve 가 완료되었는지 여부를 나타낸다.
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
@@ -31,6 +39,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         beginScope();
         resolve(stmt.statements);
         endScope();
+        return null;
+    }
+
+    @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        declare(stmt.name);
+        define(stmt.name);
         return null;
     }
 
@@ -200,7 +215,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             SInterp.error(name,
                     "Already a variable with this name in this scope.");
         }
-        scope.put(name.lexeme, false); // 선언만 되고 define 되지 않았기 때문에 false
+        scope.put(name.lexeme, false); // 선언됨. 두번째 인자는 define 될 때 true 로 설정된다.
     }
 
     // 제공된 이름이 리졸브 되었음을 체크
