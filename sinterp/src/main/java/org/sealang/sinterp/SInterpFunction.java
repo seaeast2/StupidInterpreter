@@ -2,12 +2,12 @@ package org.sealang.sinterp;
 
 import java.util.List;
 
-public class LoxFunction implements LoxCallable {
+public class SInterpFunction implements SInterpCallable {
     private final Stmt.Function declaration;
     private final Environment closure;
 
 
-    LoxFunction(Stmt.Function declaration, Environment closure) {
+    SInterpFunction(Stmt.Function declaration, Environment closure) {
         this.declaration = declaration;
         this.closure = closure;
     }

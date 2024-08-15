@@ -14,7 +14,7 @@ class Interpreter implements Expr.Visitor<Object>,
     private final Map<Expr, Integer> locals = new HashMap<>();
 
     Interpreter() {
-        globals.define("clock", new LoxCallable() {
+        globals.define("clock", new SInterpCallable() {
             @Override
             public int arity() {
                 return 0;
@@ -111,12 +111,12 @@ class Interpreter implements Expr.Visitor<Object>,
         /*
         * "hello"() 와 같은 엉뚱한 호출이 일어나지 않도록 방어
         * */
-        if (!(callee instanceof LoxCallable)) {
+        if (!(callee instanceof SInterpCallable)) {
             throw new RuntimeError(expr.paren,
                     "Can only call functions and classes.");
         }
 
-        LoxCallable function = (LoxCallable) callee;
+        SInterpCallable function = (SInterpCallable) callee;
         /*
         * 함수의 인자의 개수와 파라미터의 개수가 맞는지 체크
         * */
@@ -288,7 +288,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        LoxFunction function = new LoxFunction(stmt, environment); // closure 구현을 위해 environment 저장
+        SInterpFunction function = new SInterpFunction(stmt, environment); // closure 구현을 위해 environment 저장
         environment.define(stmt.name.lexeme, function);
         return null;
     }
