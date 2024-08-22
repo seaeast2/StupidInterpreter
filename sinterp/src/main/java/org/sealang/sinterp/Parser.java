@@ -57,7 +57,7 @@ import static org.sealang.sinterp.TokenType.*;
     term        → factor ( ( "-" | "+" ) factor )* ;
     factor      → unary ( ( "/" | "*" ) unary )* ;
     unary       → ( "!" | "-" ) unary | call ;
-    call        → primary ( "(" arguments? ")" )* ;
+    call        → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     arguments   → expression ( "," expression )* ;
 
     primary     → "true" | "false" | "nil"
@@ -408,12 +408,17 @@ class Parser {
         return new Expr.Call(callee, paren, arguments);
     }
 
+    // call        → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     private Expr call() {
         Expr expr = primary();
 
-        while(true) {
+        while(true) { // 문법 규칙상 * 에 대응
             if (match(LPAREN)) {
                 expr = finishCall(expr);
+            } else if(match(DOT)) {
+                Token name = consume(IDENTIFIER,
+                        "Expect property name atfer '.'.");
+                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }
