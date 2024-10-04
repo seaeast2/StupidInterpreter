@@ -46,7 +46,7 @@ import static org.sealang.sinterp.TokenType.*;
                 ( "else" statement )? ;
 
     expression  → assignment ;
-    assignment  → IDENTIFIER "=" assignment
+    assignment  → ( call ".")? IDENTIFIER "=" assignment
                 | logic_or ;
 
     logic_or    → logic_and ( "or" logic_and )* ;
@@ -283,10 +283,6 @@ class Parser {
         return statements;
     }
 
-    /*
-    assignment  → IDENTIFIER "=" assignment
-                | logic_or ;
-     */
     private Expr assignment() {
         Expr expr = or(); // logic_or
 
@@ -298,6 +294,9 @@ class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable)expr).name;
                 return new Expr.Assign(name, value);
+            } else if (expr instanceof Expr.Get) {
+                Expr.Get get = (Expr.Get)expr;
+                return new Expr.Set(get.object, get.name, value);
             }
 
             error(equals, "Invalid assignment target.");
@@ -413,9 +412,9 @@ class Parser {
         Expr expr = primary();
 
         while(true) { // 문법 규칙상 * 에 대응
-            if (match(LPAREN)) {
+            if (match(LPAREN)) { // "(" arguments? ")"
                 expr = finishCall(expr);
-            } else if(match(DOT)) {
+            } else if(match(DOT)) { // "." IDENTIFIER
                 Token name = consume(IDENTIFIER,
                         "Expect property name atfer '.'.");
                 expr = new Expr.Get(expr, name);

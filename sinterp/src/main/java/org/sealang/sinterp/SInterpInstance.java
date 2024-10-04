@@ -21,6 +21,10 @@ public class SInterpInstance {
                 "Undefined property '" + name.lexeme + "'.");
     }
 
+    void set(Token name, Object value) {
+        fields.put(name.lexeme, value);
+    }
+
     public String toString() {
         return klass.name + " instace";
     }

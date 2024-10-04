@@ -166,6 +166,20 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Object visitSetExpr(Expr.Set expr) {
+        Object object = evaluate(expr.object);
+
+        if (!(object instanceof SInterpInstance)) {
+            throw new RuntimeError(expr.name,
+                    "Only instances have fields.");
+        }
+
+        Object value = evaluate(expr.value);
+        ((SInterpInstance)object).set(expr.name, value);
+        return value;
+    }
+
+    @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
         Object right = evaluate(expr.right);
 
@@ -245,6 +259,7 @@ class Interpreter implements Expr.Visitor<Object>,
         return object.toString();
     }
 
+    // AST 를 순회하면서 이름으로 symbol table 에서 매칭되는 Node 를 반환한다.
     private Object evaluate(Expr expr) {
         /*
         accept 는 Expr.Visitor<R> 타입을 인자로 받으므로 accept 는

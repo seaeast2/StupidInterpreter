@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+/*
+* Resolver
+* 역할 : 전체 AST 를 순회하면서 Symbol Table 을 구축한다.
+* */
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     /* scopes 구조
@@ -155,6 +159,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitLogicalExpr(Expr.Logical expr) {
         resolve(expr.left);
         resolve(expr.right);
+        return null;
+    }
+
+    @Override
+    public Void visitSetExpr(Expr.Set expr) {
+        resolve(expr.value);
+        resolve(expr.object);
         return null;
     }
 
