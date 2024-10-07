@@ -3,6 +3,7 @@ package org.sealang.sinterp;
 import java.util.HashMap;
 import java.util.Map;
 
+// Scope 의 변수및 객체들과 Symbol 을 연결한 심볼 테이블
 public class Environment {
     final Environment enclosing; // scope 를 구현하기 위해 환경 저장
     private final Map<String, Object> values = new HashMap<>();

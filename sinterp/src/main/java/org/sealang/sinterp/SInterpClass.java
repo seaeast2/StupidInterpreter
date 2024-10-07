@@ -1,13 +1,16 @@
 package org.sealang.sinterp;
 
 import java.util.List;
+import java.util.Map;
 
 // class
 public class SInterpClass implements SInterpCallable {
     final String name;
+    private final Map<String, SInterpFunction> methods;
 
-    SInterpClass(String name) {
+    SInterpClass(String name, Map<String, SInterpFunction> methods) {
         this.name = name;
+        this.methods = methods;
     }
 
     @Override

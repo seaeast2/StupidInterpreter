@@ -301,6 +301,13 @@ class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
         environment.define(stmt.name.lexeme, null);
+
+        Map<String, SInterpFunction> methods = new HashMap<>();
+        for (Stmt.Function method : stmt.methods) {
+            SInterpFunction function = new SInterpFunction(method, environment);
+            methods.put(method.name.lexeme, function);
+        }
+
         SInterpClass klass = new SInterpClass(stmt.name.lexeme);
         environment.assign(stmt.name, klass);
         return null;
