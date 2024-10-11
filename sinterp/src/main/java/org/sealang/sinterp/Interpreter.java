@@ -308,7 +308,7 @@ class Interpreter implements Expr.Visitor<Object>,
             methods.put(method.name.lexeme, function);
         }
 
-        SInterpClass klass = new SInterpClass(stmt.name.lexeme);
+        SInterpClass klass = new SInterpClass(stmt.name.lexeme, methods);
         environment.assign(stmt.name, klass);
         return null;
     }
