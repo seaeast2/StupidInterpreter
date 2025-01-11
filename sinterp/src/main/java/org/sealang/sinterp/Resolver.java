@@ -175,6 +175,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
 
+    //
+    @Override
+    public Void visitThisExpr(Expr.This expr) {
+        resolveLocal(expr, expr.keyword); // 가장 가까운 스코프의 this 를 연결함
+        return null;
+    }
+
     @Override
     public Void visitUnaryExpr(Expr.Unary expr) {
         resolve(expr.right);
@@ -228,8 +235,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scopes.pop();
     }
 
-    // 이름 있는 객체(함수나 변수들)를 scope symbol table 에 등록
+    // 11.3.2 변수 선언 리졸빙 : 선언만 되고 리졸브 되지 않은 상태를 표시
     private void declare(Token name) {
+        // 이름 있는 객체(함수나 변수들)를 scope symbol table 에 등록
         if (scopes.isEmpty())
             return;
 
@@ -241,13 +249,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scope.put(name.lexeme, false); // 선언됨. 두번째 인자는 define 될 때 true 로 설정된다.
     }
 
-    // 제공된 이름이 리졸브 되었음을 체크
+    // declare() 로 선언된 변수가 초기화 되어 사용 가능한 상태가 되었음을 표시
     private void define(Token name) {
         if (scopes.isEmpty())
             return;
         scopes.peek().put(name.lexeme, true); // define 된 순간 true 로 변경
     }
 
+    // 스코프 stack 에서 가장 가까운 곳에 걸리는 것과 expr 을 연결
     private void resolveLocal(Expr expr, Token name) {
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(name.lexeme)) {

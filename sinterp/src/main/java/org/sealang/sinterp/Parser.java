@@ -63,6 +63,7 @@ import static org.sealang.sinterp.TokenType.*;
     primary     → "true" | "false" | "nil"
                 | NUMBER | STRING
                 | "(" expression ")"
+                | "this"
                 | IDENTIFIER ;
  */
 
@@ -426,7 +427,6 @@ class Parser {
         return expr;
     }
 
-    // primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
     private Expr primary() {
         if (match(FALSE))
             return new Expr.Literal(false);
@@ -437,6 +437,9 @@ class Parser {
         if (match(NUMBER, STRING)) {
             return new Expr.Literal(previous().literal);
         }
+        if (match(THIS))
+            return new Expr.This(previous()); // "this" 토큰을 넣는다. ?? 왜?
+
         if (match(IDENTIFIER)) {
             return new Expr.Variable(previous());
         }
