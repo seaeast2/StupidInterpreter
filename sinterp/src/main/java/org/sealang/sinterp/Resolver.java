@@ -52,10 +52,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name);
         define(stmt.name);
 
+        // this 처리를 위해 class 의 스코프에 this 등록
+        beginScope();
+        scopes.peek().put("this", true);
         for (Stmt.Function method : stmt.methods) {
             FunctionType declaration = FunctionType.METHOD;
             resolveFunction(method, declaration);
         }
+        endScope();
         return null;
     }
 

@@ -12,6 +12,12 @@ public class SInterpFunction implements SInterpCallable {
         this.closure = closure;
     }
 
+    SInterpFunction bind(SInterpInstance instance) {
+        Environment environment = new Environment(closure);
+        environment.define("this", instance);
+        return new SInterpFunction(declaration, environment);
+    }
+
     @Override
     public String toString() {
         return "<fn " + declaration.name.lexeme + ">";
