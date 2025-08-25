@@ -50,14 +50,18 @@ class AstPrinter implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitThisExpr(Expr.This expr) {
+        return "this";
+    }
+
+    @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         return parenthesize(expr.operator.lexeme, expr.right);
     }
 
     @Override
     public String visitVariableExpr(Expr.Variable expr) {
-        // TODO : AstPrinter.visitVariableExpr() 구현 할 것.
-        return null;
+        return expr.name.lexeme;
     }
 
     private String parenthesize(String name, Expr... exprs) {
@@ -88,4 +92,3 @@ class AstPrinter implements Expr.Visitor<String> {
     }
     */
 }
-
